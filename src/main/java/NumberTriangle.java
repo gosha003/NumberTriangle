@@ -156,11 +156,11 @@ public class NumberTriangle {
                 br.close();
                 throw new IOException("First line contained no numbers.");
             }
-            top = firstRow.get(0);          // top of the triangle
+            top = firstRow.get(0);
             prevRow = firstRow;
         }
 
-        // Build subsequent rows and wire parent/child links
+        // Build subsequent rows and wire parent/child links.
         while ((line = br.readLine()) != null) {
             line = line.trim();
             if (line.isEmpty()) continue;

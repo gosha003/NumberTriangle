@@ -87,9 +87,29 @@ public class NumberTriangle {
      * @return the root value at the location indicated by path
      *
      */
+
     public int retrieve(String path) {
-        // TODO implement this method
-        return -1;
+
+        if (this.isLeaf()) {
+            return this.getRoot();
+        }
+
+        else if (path.isEmpty()) {
+            return this.root;
+        }
+
+        else {
+
+            if (path.charAt(0) == 'r') {
+                return this.right.retrieve(path.substring(1));
+            }
+
+            else {
+                return this.left.retrieve(path.substring(1));
+            }
+
+        }
+
     }
 
     /** Read in the NumberTriangle structure from a file.
@@ -103,33 +123,73 @@ public class NumberTriangle {
      * @return the topmost NumberTriangle object in the NumberTriangle structure read from the specified file
      * @throws IOException may naturally occur if an issue reading the file occurs
      */
+
     public static NumberTriangle loadTriangle(String fname) throws IOException {
-        // open the file and get a BufferedReader object whose methods
-        // are more convenient to work with when reading the file contents.
+        // Open the resource file with a BufferedReader
         InputStream inputStream = NumberTriangle.class.getClassLoader().getResourceAsStream(fname);
+        if (inputStream == null) {
+            throw new FileNotFoundException("Resource not found: " + fname);
+        }
         BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
 
-
-        // TODO define any variables that you want to use to store things
-
-        // will need to return the top of the NumberTriangle,
-        // so might want a variable for that.
         NumberTriangle top = null;
 
+        // We'll keep only the previous row while we build the current row
+        java.util.List<NumberTriangle> prevRow = new java.util.ArrayList<>();
+
         String line = br.readLine();
-        while (line != null) {
-
-            // remove when done; this line is included so running starter code prints the contents of the file
-            System.out.println(line);
-
-            // TODO process the line
-
-            //read the next line
-            line = br.readLine();
+        if (line == null) {
+            br.close();
+            throw new IOException("Empty triangle file: " + fname);
         }
+
+        // Build the first row (usually a single number)
+        {
+            String[] toks = line.trim().split("\\s+");
+            java.util.List<NumberTriangle> firstRow = new java.util.ArrayList<>(toks.length);
+            for (String t : toks) {
+                if (!t.isEmpty()) {
+                    firstRow.add(new NumberTriangle(Integer.parseInt(t)));
+                }
+            }
+            if (firstRow.isEmpty()) {
+                br.close();
+                throw new IOException("First line contained no numbers.");
+            }
+            top = firstRow.get(0);          // top of the triangle
+            prevRow = firstRow;
+        }
+
+        // Build subsequent rows and wire parent/child links
+        while ((line = br.readLine()) != null) {
+            line = line.trim();
+            if (line.isEmpty()) continue;
+
+            String[] toks = line.split("\\s+");
+            java.util.List<NumberTriangle> curRow = new java.util.ArrayList<>(toks.length);
+
+            for (int j = 0; j < toks.length; j++) {
+                NumberTriangle node = new NumberTriangle(Integer.parseInt(toks[j]));
+                curRow.add(node);
+
+                // Link from parents in prevRow to this node:
+                // - prevRow[j] -> left child is curRow[j]        (same column index)
+                // - prevRow[j-1] -> right child is curRow[j]     (index + 1)
+                if (j < prevRow.size()) {
+                    prevRow.get(j).setLeft(node);
+                }
+                if (j - 1 >= 0) {
+                    prevRow.get(j - 1).setRight(node);
+                }
+            }
+
+            prevRow = curRow;
+        }
+
         br.close();
         return top;
     }
+
 
     public static void main(String[] args) throws IOException {
 

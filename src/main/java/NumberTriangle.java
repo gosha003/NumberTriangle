@@ -154,7 +154,7 @@ public class NumberTriangle {
             }
             if (firstRow.isEmpty()) {
                 br.close();
-                throw new IOException("First line contained no numbers.");
+                throw new IOException("First line contained no numbers");
             }
             top = firstRow.get(0);
             prevRow = firstRow;
@@ -171,10 +171,10 @@ public class NumberTriangle {
             for (int j = 0; j < toks.length; j++) {
                 NumberTriangle node = new NumberTriangle(Integer.parseInt(toks[j]));
                 curRow.add(node);
-
                 // Link from parents in prevRow to this node:
                 // - prevRow[j] -> left child is curRow[j]        (same column index)
                 // - prevRow[j-1] -> right child is curRow[j]     (index + 1)
+                //
                 if (j < prevRow.size()) {
                     prevRow.get(j).setLeft(node);
                 }
@@ -185,7 +185,6 @@ public class NumberTriangle {
 
             prevRow = curRow;
         }
-
         br.close();
         return top;
     }
